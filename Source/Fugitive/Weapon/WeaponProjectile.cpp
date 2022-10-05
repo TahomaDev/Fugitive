@@ -25,12 +25,6 @@ AWeaponProjectile::AWeaponProjectile()
 	BulletCollisionSphere->SetGenerateOverlapEvents(true);
 	RootComponent = BulletCollisionSphere;
 	
-/*	BulletCollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Collision Sphere"));
-	BulletCollisionSphere->SetSphereRadius(16.f);
-	BulletCollisionSphere->bReturnMaterialOnMove = true;//hit event return physMaterial
-	BulletCollisionSphere->SetCanEverAffectNavigation(false);//collision not affect navigation (P keybord on editor)
-	RootComponent = BulletCollisionSphere;*/
-
 	BulletMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Bullet Projectile Mesh"));	
 	BulletMesh->SetupAttachment(RootComponent);
 	BulletMesh->SetCanEverAffectNavigation(false);

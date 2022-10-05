@@ -88,9 +88,6 @@ void AWeaponDefault::InitWeapon(USkeletalMeshComponent* Parent, FWeaponInfo NewW
 
 void AWeaponDefault::Destroyed()
 {
-//	if (WeaponFireType != nullptr)
-//		delete WeaponFireType;
-	
 	Super::Destroyed();
 }
 
