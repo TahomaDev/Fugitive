@@ -57,19 +57,7 @@ AFugitiveCharacter::AFugitiveCharacter()
 	InventoryComponent = CreateDefaultSubobject<UT_InventoryComponent>(TEXT("InventoryComponent"));
 	HealthComponent = CreateDefaultSubobject<UT_HealthComponent>(TEXT("HealthComponent"));
 
-/*	
-	// Create a decal in the world to show the cursor's location
-	CursorToWorld = CreateDefaultSubobject<UDecalComponent>("CursorToWorld");
-	CursorToWorld->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("Material'/Game/TopDownCPP/Blueprints/M_Cursor_Decal.M_Cursor_Decal'"));
-	if (DecalMaterialAsset.Succeeded())
-	{
-		CursorToWorld->SetDecalMaterial(DecalMaterialAsset.Object);
-	}
-	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
-	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
-*/
-	
+
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -123,19 +111,7 @@ void AFugitiveCharacter::MovementTick(float DeltaSeconds)
 {
 	if (!MyPlayerController)
 		return;
-/*
-	FVector ActorForwardVector = GetActorForwardVector();
-	UE_LOG(LogTemp, Warning, TEXT("%s - [Forward] %f.%f.%f"), TEXT(__FUNCTION__),
-					ActorForwardVector.X,
-					ActorForwardVector.Y,
-					ActorForwardVector.Z);
 
-	if ( (ActorForwardVector.X >= -0.94f && ActorForwardVector.X <= 0.94f && abs(ActorForwardVector.Y) > 0.34f) )
-	{
-		MovementState = EMovementState::Backwalk_State;
-		MovementSpeedUpdate();
-	}
-*/
 	
 	if (MyPlayerController->GetCanMove()
 		&& MyPlayerController->GetHitResultUnderCursor(ECC_Visibility, true, MouseClickHitResult))
@@ -165,7 +141,6 @@ void AFugitiveCharacter::SetupPlayerInputComponent(UInputComponent* NewInputComp
 #endif CAMERAMOVEAWAY_ENABLE	
 
 	NewInputComponent->BindAxis(TEXT("MouseMovement"), this, &AFugitiveCharacter::InputActionPressed);
-//	NewInputComponent->BindAction(TEXT("FireEvent"), EInputEvent::IE_Released, this, &AFugitiveCharacter::InputAttackReleased);
 
 	NewInputComponent->BindAction(TEXT("SelectHandWeapon1"), EInputEvent::IE_Released, this, &AFugitiveCharacter::InputSelectHandWeapon1);
 	NewInputComponent->BindAction(TEXT("SelectHandWeapon2"), EInputEvent::IE_Released, this, &AFugitiveCharacter::InputSelectHandWeapon2);
@@ -582,38 +557,10 @@ void AFugitiveCharacter::CharacterInitWeapon(FName IdWeaponName, uint8 RoundInMa
 		AWeaponDefault* myWeapon = Cast<AWeaponDefault>(GetWorld()->SpawnActor(myWeaponInfo.WeaponClass, &SpawnLocation, &SpawnRotation, SpawnParams));
 		if (myWeapon)
 		{
-/*			if (myWeaponInfo.WeaponType == EWeaponTypes::Grenade)
-			{
-				FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
-				myWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+			myWeapon->InitWeapon(GetMesh(), myWeaponInfo, MovementState, RoundInMagazine);
+			myWeapon->OnChangeWeaponMagazine.AddDynamic(this, &AFugitiveCharacter::OnChangeWeaponMagazine);
 
-				if (MyPlayerController)
-					myWeapon->ShootEndLocation = CursorLocation;
-				
-				float Distance = (myWeapon->ShootEndLocation - GetActorLocation()).Size();
-				if (Distance < 400.f)
-					myWeaponInfo.ProjectileSetting.ProjectileInitSpeed = Distance;
-				else
-					myWeaponInfo.ProjectileSetting.ProjectileInitSpeed = Distance/1.5;
-				
-				myWeapon->WeaponInfo = myWeaponInfo;
-				
-				myWeapon->FireGrenade();
-			}
-			else
-			{*/
-//				FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
-//				myWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
-
-				myWeapon->InitWeapon(GetMesh(), myWeaponInfo, MovementState, RoundInMagazine);
-//				myWeapon->WeaponInfo = myWeaponInfo;
-//				myWeapon->UpdateStateWeapon(MovementState);
-//				myWeapon->SetWeaponRound(RoundInMagazine);
-
-				myWeapon->OnChangeWeaponMagazine.AddDynamic(this, &AFugitiveCharacter::OnChangeWeaponMagazine);
-
-				CurrentWeapon = myWeapon;
-//			}
+			CurrentWeapon = myWeapon;
 		}
 	}
 	else
@@ -656,7 +603,7 @@ void AFugitiveCharacter::OnEmptyHealth()
 
 void AFugitiveCharacter::OnDead()
 {
-	float TimeAnimation = 1.f; // 0.f; 
+	float TimeAnimation = 1.f;
 	
 	int32 rnd = FMath::RandHelper(DeadsAnim.Num()); 
 	if (DeadsAnim.IsValidIndex(rnd) && DeadsAnim[rnd] && GetMesh() && GetMesh()->GetAnimInstance())
